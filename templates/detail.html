@@ -39,21 +39,30 @@
             newIframe.appendTo("div#queue");
         }
 
-        var currentActive = $("iframe.active");
-        var nextInLine;
+        currentActive = getCurrent();
+
+        var nextInLine = getNext(currentActive);
         if (currentActive.length > 0) {
-            nextInLine = currentActive.next();
-            if (nextInLine.length == 0) { // we're wrapping the list
-                nextInLine = $("iframe").first();
-            }
             currentActive.removeClass("active");
-        } else {
-            nextInLine = $("iframe").first();
         }
         // Activate next in queue
         nextInLine.addClass("active");
+
+        // reload the next-next iframe in advance
+        getNext(getCurrent()).attr('src', getNext(getCurrent()).attr('src'));
     }
 
+
+    function getCurrent() {
+        return $("iframe.active");
+    }
+    function getNext(current) {
+        if (current.length == 0 || current.next().length == 0) { // no current or current is the last, then the next should point to the first item in list
+            return $("iframe").first();
+        } else {
+            return current.next();
+        }
+    }
     function keepLoading() {
         loadNext();
         setTimeout(keepLoading, interval);
