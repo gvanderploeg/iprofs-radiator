@@ -3,17 +3,27 @@
 <head>
 
     <style type="text/css">
-        iframe {
+        iframe.preload {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border: none; padding-top: 1px;
+            top: -10000px; left: -10000px; width: 100%; height: 100%;
+            border: none;
+            padding-top: 0;
             box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;
         }
+
+        iframe.active {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none;
+            padding: 0;
+            box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;
+        }
+
     </style>
 </head>
 <body>
-
-    <iframe seamless="seamless" id="theframe"></iframe>
+    <div id="queue">
+    </div>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 <script type="text/javascript">
@@ -21,15 +31,34 @@
     var interval = {{interval}};
 
     function loadNext() {
-        var next = urls.shift();
-        $('iframe#theframe').attr('src',next.fields.url);
-        urls.push(next);
+        if (urls.length > 0) {
+            var nextNew = urls.shift();
+            console.log("adding new: " + nextNew.fields.url);
+            var newIframe = $('<iframe seamless="seamless" class="preload"></iframe>');
+            newIframe.attr('src', nextNew.fields.url);
+            newIframe.appendTo("div#queue");
+        }
+
+        var currentActive = $("iframe.active");
+        var nextInLine;
+        if (currentActive.length > 0) {
+            nextInLine = currentActive.next();
+            if (nextInLine.length == 0) { // we're wrapping the list
+                nextInLine = $("iframe").first();
+            }
+            currentActive.removeClass("active");
+        } else {
+            nextInLine = $("iframe").first();
+        }
+        // Activate next in queue
+        nextInLine.addClass("active");
     }
 
     function keepLoading() {
         loadNext();
         setTimeout(keepLoading, interval);
     }
+
     $(function() {
         keepLoading();
     });
