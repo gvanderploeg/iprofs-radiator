@@ -8,8 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def detail(request, device_id):
-    device = get_object_or_404(Device, pk=device_id)
+def detail(request, device_uuid):
+    device = get_object_or_404(Device, uuid=device_uuid)
     urls = device.playlist.url_set.all()
     urlsJson = serializers.serialize("json", urls)
     return render_to_response('detail.html', {'urls': urlsJson, 'interval': device.interval})
